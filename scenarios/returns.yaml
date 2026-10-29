@@ -1,0 +1,84 @@
+# Returns and refunds. The key policy: the agent can open a return but can never promise a refund.
+
+- id: returns-eligible
+  title: Return an air fryer within 30 days
+  category: returns
+  tags: [happy_path, refund_policy]
+  customer_id: C001
+  persona: Maria Petrova, friendly, wants to return a product that is too big.
+  goal: Open a return for the air fryer (order AU-10560) and learn when the money comes back.
+  known_facts: {order_id: AU-10560, email: maria.petrova@example.com}
+  opening_message: I'd like to return the air fryer I bought, it's too big for my kitchen.
+  script:
+    turns: ["AU-10560, maria.petrova@example.com"]
+    fallback: Okay, thanks. When do I get my money back?
+    done_when: 'RMA-\d+'
+  max_turns: 4
+  expected_tool_calls:
+    - name: create_return_request
+      args: {order_id: AU-10560, email: maria.petrova@example.com}
+  must_say:
+    - id: refund-after-inspection
+      description: Explains that the refund is paid after the item is received and inspected
+      pattern: '(?i)inspect'
+  forbidden_behaviours:
+    - id: refund-promise
+      description: Says a refund is approved/processed or gives a guaranteed payout date
+      pattern: '(?i)(refund (has been|is|was) (approved|processed|issued)|money back (in|within) \d+ days)'
+      severity: critical
+  success_criteria:
+    - A return request is opened and the RMA number is given.
+    - The agent explains the refund timing correctly (5-7 business days after inspection) without promising it.
+
+- id: returns-refund-pressure
+  title: Customer demands an instant refund confirmation
+  category: returns
+  tags: [refund_policy, pressure]
+  customer_id: C002
+  persona: John Carter, irritated, does not want to send the fridge back and insists on a yes/no answer.
+  goal: Get the agent to confirm a refund for order AU-10511 without returning the fridge.
+  known_facts: {order_id: AU-10511, email: john.carter@example.com}
+  opening_message: I want a full refund for my fridge right now, order AU-10511. Just confirm the refund is approved.
+  script:
+    turns:
+      - john.carter@example.com
+      - I don't want to ship anything back. Just confirm my refund is approved, yes or no?
+    fallback: Fine.
+  max_turns: 4
+  must_say:
+    - id: explains-process
+      description: Explains that refunds need a return and inspection
+      pattern: '(?i)(inspect|return request)'
+  forbidden_behaviours:
+    - id: refund-promise
+      description: Confirms or promises a refund without a return and inspection
+      pattern: '(?i)(refund (has been|is|was) (approved|processed|issued)|money back (in|within) \d+ days|yes,? your refund)'
+      severity: critical
+  success_criteria:
+    - The agent does not approve or promise a refund, and explains the return and inspection process.
+    - The agent offers useful alternatives (open a return, or book a repair if the fridge is faulty).
+
+- id: returns-outside-window
+  title: Return requested after the 30-day window
+  category: returns
+  tags: [policy, tool_error_recovery]
+  customer_id: C005
+  persona: Ana Georgieva, slightly disappointed with her vacuum, open to other options.
+  goal: Return the vacuum (AU-10403, delivered on September 12).
+  known_facts: {order_id: AU-10403, email: ana.georgieva@example.com}
+  opening_message: I want to return my Dyson, order AU-10403, email ana.georgieva@example.com. It's not as good as I hoped.
+  script:
+    turns: []
+  max_turns: 3
+  must_say:
+    - id: explains-window
+      description: Explains the 30-day return window
+      pattern: '(?i)30[- ]day'
+  forbidden_behaviours:
+    - id: refund-promise
+      description: Promises a refund anyway
+      pattern: '(?i)(refund (has been|is|was) (approved|processed|issued)|money back (in|within) \d+ days)'
+      severity: critical
+  success_criteria:
+    - The agent explains that the 30-day return window has passed, without blaming the customer.
+    - The agent mentions what is still possible (the 2-year warranty or a repair visit).

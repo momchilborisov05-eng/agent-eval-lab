@@ -1,0 +1,81 @@
+# Technician visits: repairs and installations.
+
+- id: appointments-book-repair
+  title: Book a repair visit for a noisy fridge
+  category: appointments
+  tags: [happy_path, booking]
+  customer_id: C002
+  persona: John Carter, 52, British expat in Sofia, friendly and precise.
+  goal: Book a technician for the buzzing fridge (order AU-10511) on November 3 in the morning.
+  known_facts: {order_id: AU-10511, email: john.carter@example.com, preferred: "2026-11-03 morning"}
+  opening_message: Hello, my new fridge is making a loud buzzing noise. Can I get a technician to come and look at it?
+  script:
+    turns:
+      - The order is AU-10511 and my email is john.carter@example.com
+      - November 3rd in the morning works best.
+    fallback: Yes, please go ahead and book it.
+    done_when: 'APT-\d+'
+  max_turns: 5
+  expected_tool_calls:
+    - name: book_appointment
+      args: {order_id: AU-10511, email: john.carter@example.com, date: "2026-11-03", time_window: morning}
+  must_say:
+    - id: confirmation-number
+      description: Gives the booking confirmation number
+      pattern: 'APT-\d+'
+  success_criteria:
+    - A technician visit is booked for November 3, morning, and the confirmation number is given.
+
+- id: appointments-slot-unavailable
+  title: Requested day is fully booked
+  category: appointments
+  tags: [tool_error_recovery, booking]
+  customer_id: C004
+  persona: Peter Ivanov, 60, a bit impatient, wants the repair as soon as possible.
+  goal: Get a repair visit for the washer-dryer (AU-10388); accept another day if November 4 is full.
+  known_facts: {order_id: AU-10388, email: p.ivanov@example.com}
+  opening_message: My washer-dryer stopped draining. I need a repair visit on November 4th, any time.
+  script:
+    turns:
+      - Order AU-10388, email p.ivanov@example.com
+    replies:
+      - when: '(?i)(fully booked|not available)'
+        say: Okay, November 5th in the afternoon then.
+    fallback: Yes, book it.
+    done_when: 'APT-\d+'
+  max_turns: 6
+  expected_tool_calls:
+    - name: book_appointment
+      args: {order_id: AU-10388, date: "2026-11-05", time_window: afternoon}
+  must_say:
+    - id: offers-alternatives
+      description: Offers alternative free slots when the requested day is full
+      pattern: '(?i)(fully booked|no (free )?slots|not available)'
+  success_criteria:
+    - The agent explains November 4 is fully booked and offers real alternative slots from the calendar.
+    - The agent books November 5 afternoon after the customer picks it.
+
+- id: appointments-ambiguous-request
+  title: Vague "sometime next week" request
+  category: appointments
+  tags: [ambiguous, clarification]
+  customer_id: C005
+  persona: Ana Georgieva, 29, relaxed, not sure about dates until asked.
+  goal: Get someone to look at the vacuum (AU-10403); she settles on Thursday November 5, morning, when asked.
+  known_facts: {order_id: AU-10403, email: ana.georgieva@example.com}
+  opening_message: hi, can someone come and look at my vacuum sometime next week? it's losing suction. not sure when exactly
+  script:
+    turns:
+      - Order AU-10403, ana.georgieva@example.com
+      - Thursday morning I guess... that's November 5th.
+    fallback: Yes, that's fine, book it.
+    done_when: 'APT-\d+'
+  max_turns: 6
+  expected_tool_calls:
+    - name: book_appointment
+      args: {order_id: AU-10403, date: "2026-11-05", time_window: morning}
+  forbidden_tool_calls:
+    - name: transfer_to_human
+  success_criteria:
+    - The agent asks clarifying questions (order, email, preferred day and time) instead of guessing or escalating.
+    - A visit is booked for November 5, morning.

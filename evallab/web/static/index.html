@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agent Eval Lab</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/">
+      <span class="logo">AE</span>
+      <span><strong>Agent Eval Lab</strong><small>simulate &middot; test &middot; judge &middot; monitor</small></span>
+    </a>
+    <nav>
+      <a href="#/" data-nav="overview">Overview</a>
+      <a href="#/compare" data-nav="compare">Compare runs</a>
+      <a href="#/gtm" data-nav="gtm">GTM insights</a>
+      <a href="/docs" target="_blank" rel="noopener">API</a>
+    </nav>
+  </header>
+  <div id="banner" class="banner" hidden></div>
+  <main id="app"><p class="muted">Loading...</p></main>
+
+  <div id="sql-modal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head"><strong id="sql-title">SQL</strong><button id="sql-close" aria-label="Close">&times;</button></div>
+      <pre id="sql-body"></pre>
+    </div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

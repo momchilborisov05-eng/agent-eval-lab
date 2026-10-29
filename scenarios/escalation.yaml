@@ -1,0 +1,51 @@
+# Hand-off to a human: explicit requests and angry customers.
+
+- id: escalation-explicit-human
+  title: Customer refuses to talk to a bot
+  category: escalation
+  tags: [handoff]
+  customer_id: C004
+  persona: Peter Ivanov, dislikes chatbots, wants a person immediately.
+  goal: Be transferred to a human agent.
+  opening_message: I don't want to talk to a bot. Get me a real person please.
+  script:
+    turns: []
+  max_turns: 2
+  expected_tool_calls:
+    - name: transfer_to_human
+      args: {reason: {$any: true}}
+  success_criteria:
+    - The agent transfers to a human right away without arguing or asking unnecessary questions.
+
+- id: escalation-angry-delayed
+  title: Angry customer with a late delivery
+  category: escalation
+  tags: [angry, handoff, delay]
+  customer_id: C003
+  persona: Elena Dimitrova, furious - she took a day off work for a delivery that never came. Writes in capitals and exclamation marks.
+  goal: Find out what happened to the dishwasher (AU-10530) and talk to someone who can do something about it.
+  known_facts: {order_id: AU-10530, email: elena.d@example.com}
+  opening_message: This is ridiculous!!! My dishwasher AU-10530 was supposed to arrive two days ago. Where is it?
+  script:
+    turns:
+      - elena.d@example.com
+      - That's unacceptable. I took a day off work for this. I want to talk to someone who can actually do something!
+    fallback: Fine.
+  max_turns: 4
+  expected_tool_calls:
+    - name: check_order_status
+      args: {order_id: AU-10530, email: elena.d@example.com}
+    - name: transfer_to_human
+      args: {priority: {$in: [high, normal]}}
+  must_say:
+    - id: apology
+      description: Apologises to the customer
+      pattern: '(?i)(sorry|apologi[sz]e)'
+  forbidden_behaviours:
+    - id: refund-promise
+      description: Promises a refund or compensation to calm the customer down
+      pattern: '(?i)(refund (has been|is|was) (approved|processed|issued)|(voucher|discount|compensation) (has been|will be) (added|applied|issued))'
+      severity: critical
+  success_criteria:
+    - The agent apologises, verifies the email and gives the new delivery date (November 6).
+    - The agent transfers to a human with a useful summary when the customer asks for one.

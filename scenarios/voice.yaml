@@ -1,0 +1,76 @@
+# Voice-channel scenarios: openings are written like speech-to-text transcripts (fillers, spelled-out
+# numbers, "dot" and "at"). Voice turns have a tighter latency budget than chat.
+
+- id: voice-disfluent-order-id
+  title: Spoken order number with fillers
+  category: voice
+  tags: [asr, disfluency]
+  channel: voice
+  customer_id: C001
+  persona: Maria Petrova calling from her car, speaks with fillers.
+  goal: Find out when washing machine order AU-10482 arrives.
+  known_facts: {order_id: AU-10482, email: maria.petrova@example.com}
+  opening_message: uh hi yeah so I'm calling about my order, it's, um, A U one oh four eight two? and the email is maria dot petrova at example dot com
+  script:
+    turns: []
+    fallback: Sorry, I said A U one zero four eight two.
+    done_when: '(?i)(october 31|oct\.? 31|31(st)? oct)'
+  max_turns: 4
+  max_latency_ms: 2500
+  expected_tool_calls:
+    - name: check_order_status
+      args: {order_id: AU-10482, email: maria.petrova@example.com}
+  must_say:
+    - id: gives-eta
+      description: Gives the delivery date
+      pattern: '(?i)(october 31|oct\.? 31|31(st)? oct)'
+  success_criteria:
+    - The agent understands the spoken order number and email and gives the October 31 delivery date.
+
+- id: voice-book-installation
+  title: Book an installation over the phone
+  category: voice
+  tags: [booking, latency]
+  channel: voice
+  customer_id: C001
+  persona: Maria Petrova, calling during a short break, wants a quick booking.
+  goal: Book installation of the washing machine (AU-10482) for November 2 in the afternoon.
+  known_facts: {order_id: AU-10482, email: maria.petrova@example.com}
+  opening_message: Hi, I'd like to book an installation visit for my washing machine. The order is AU-10482.
+  script:
+    turns:
+      - My email is maria.petrova@example.com
+      - November 2nd, afternoon please.
+    fallback: Yes, please book it.
+    done_when: 'APT-\d+'
+  max_turns: 5
+  max_latency_ms: 2200
+  expected_tool_calls:
+    - name: book_appointment
+      args: {order_id: AU-10482, date: "2026-11-02", time_window: afternoon}
+  success_criteria:
+    - The installation is booked for November 2, afternoon, with short voice-friendly answers.
+
+- id: voice-spelled-email
+  title: Email spelled letter by letter
+  category: voice
+  tags: [asr, verification]
+  channel: voice
+  customer_id: C002
+  persona: John Carter on a noisy line, spells his email letter by letter when asked.
+  goal: Check the status of fridge order AU-10511.
+  known_facts: {order_id: AU-10511, email: john.carter@example.com}
+  opening_message: Hi, I'm calling to check on my fridge order, AU-10511.
+  script:
+    turns:
+      - Sure, it's j o h n dot c a r t e r at example dot com
+      - J-O-H-N dot C-A-R-T-E-R at example dot com.
+    fallback: I already told you my email.
+    done_when: '(?i)delivered'
+  max_turns: 4
+  max_latency_ms: 2500
+  expected_tool_calls:
+    - name: check_order_status
+      args: {order_id: AU-10511, email: john.carter@example.com}
+  success_criteria:
+    - The agent reconstructs the spelled-out email, verifies it and says the fridge was delivered on October 14.

@@ -1,0 +1,72 @@
+# Help-centre questions and a pre-sales conversation (the GTM lead-extraction example).
+
+- id: faq-warranty
+  title: Warranty length and extension
+  category: faq
+  tags: [knowledge]
+  persona: An anonymous visitor comparing shops before buying a fridge.
+  goal: Learn how long the warranty is and whether it can be extended.
+  opening_message: How long is the warranty on your appliances? And can I extend it?
+  script:
+    turns: []
+  max_turns: 3
+  expected_tool_calls:
+    - name: lookup_faq
+      args: {query: {$any: true}}
+  must_say:
+    - id: two-years
+      description: States the 2-year warranty
+      pattern: '(?i)\b(2|two)[- ]year'
+    - id: extension
+      description: Explains the 3-year extension
+      pattern: '(?i)\b(3|three)[- ]year'
+  success_criteria:
+    - The agent answers from the help centre - 2-year warranty, extendable to 3 years with Brightway Care.
+
+- id: faq-delivery-installation
+  title: Delivery cost and dishwasher installation
+  category: faq
+  tags: [knowledge, multi_question]
+  persona: A visitor planning to buy a dishwasher.
+  goal: Find out the delivery cost and whether Brightway installs dishwashers (and the price).
+  opening_message: How much does delivery cost, and do you install dishwashers?
+  script:
+    turns: []
+  max_turns: 3
+  expected_tool_calls:
+    - name: lookup_faq
+      args: {query: {$regex: '(?i)deliver'}}
+    - name: lookup_faq
+      args: {query: {$regex: '(?i)install'}}
+  must_say:
+    - id: free-over-300
+      description: Mentions free delivery over 300 EUR
+      pattern: '300'
+    - id: install-price
+      description: Gives the 39 EUR installation price
+      pattern: '39'
+  success_criteria:
+    - The agent answers both questions with the correct prices (free over 300 EUR / 15 EUR; installation 39 EUR).
+
+- id: sales-purchase-inquiry
+  title: Pre-sales question about a dishwasher
+  category: sales
+  tags: [gtm, lead]
+  persona: A homeowner renovating a kitchen, ready to buy soon, interested in a matching oven.
+  goal: Check that the Miele G 7000 is available in black and can be delivered before November 15; ask about delivery, installation and a matching oven.
+  opening_message: Hi, do you have the Miele G 7000 dishwasher in black? I'm renovating my kitchen and need it delivered before November 15th.
+  script:
+    turns:
+      - Great. What does delivery and installation cost? I might also need a matching oven.
+    fallback: Thanks, I'll probably order this week.
+  max_turns: 4
+  expected_tool_calls:
+    - name: lookup_faq
+      args: {query: {$regex: '(?i)(miele|dishwasher)'}}
+  must_say:
+    - id: in-stock
+      description: Confirms the dishwasher is in stock
+      pattern: '(?i)in stock'
+  success_criteria:
+    - The agent confirms availability in black, the price, and delivery within the customer's deadline.
+    - The agent answers the delivery/installation question and helps with the matching oven.

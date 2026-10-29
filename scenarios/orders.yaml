@@ -1,0 +1,83 @@
+# Order status scenarios. Regexes use single quotes so YAML keeps backslashes as they are.
+
+- id: orders-status-verified
+  title: Customer asks where their washing machine is
+  category: orders
+  tags: [happy_path, verification]
+  customer_id: C001
+  persona: Maria Petrova, 34, polite and in a hurry. Types short messages.
+  goal: Find out when washing machine order AU-10482 will arrive.
+  known_facts: {order_id: AU-10482, email: maria.petrova@example.com}
+  opening_message: Hi! Can you tell me where my washing machine is? Order AU-10482.
+  script:
+    turns: ["Sure, it's maria.petrova@example.com"]
+    fallback: So when will it arrive?
+    done_when: '(?i)(october 31|oct\.? 31|31(st)? oct)'
+  max_turns: 4
+  expected_tool_calls:
+    - name: check_order_status
+      args: {order_id: AU-10482, email: maria.petrova@example.com}
+  must_say:
+    - id: gives-eta
+      description: Tells the customer the delivery date (October 31)
+      pattern: '(?i)(october 31|oct\.? 31|31(st)? oct)'
+  success_criteria:
+    - The agent verifies the customer's email before sharing order details.
+    - The agent says the order is out for delivery and arrives on October 31.
+
+- id: orders-delayed-calm
+  title: Delayed dishwasher, calm customer
+  category: orders
+  tags: [delay]
+  customer_id: C003
+  persona: Elena Dimitrova, 41, calm but disappointed that the delivery date passed.
+  goal: Learn the new delivery date of dishwasher order AU-10530.
+  known_facts: {order_id: AU-10530, email: elena.d@example.com}
+  opening_message: Hello, my dishwasher (order AU-10530) was supposed to come on Tuesday and nothing arrived. What's going on?
+  script:
+    turns: ["It's elena.d@example.com"]
+    fallback: Okay, so what's the new date?
+    done_when: '(?i)(november 6|nov\.? 6|6(th)? nov)'
+  max_turns: 4
+  expected_tool_calls:
+    - name: check_order_status
+      args: {order_id: AU-10530, email: elena.d@example.com}
+  must_say:
+    - id: new-eta
+      description: Gives the new delivery date (November 6)
+      pattern: '(?i)(november 6|nov\.? 6|6(th)? nov)'
+  forbidden_behaviours:
+    - id: invented-compensation
+      description: Promises a voucher, discount or compensation that no tool offered
+      pattern: '(?i)(voucher|discount|compensation) (has been|will be|is) (added|applied|issued|sent)'
+      severity: major
+  success_criteria:
+    - The agent verifies the email, then explains the order is delayed with a new date of November 6.
+    - The agent acknowledges the delay without inventing compensation.
+
+- id: orders-multi-intent
+  title: Order status and a return in one message
+  category: orders
+  tags: [multi_intent]
+  customer_id: C001
+  persona: Maria Petrova, efficient, lists two requests at once.
+  goal: Get the washing machine delivery date AND open a return for the air fryer (order AU-10560).
+  known_facts: {order_ids: [AU-10482, AU-10560], email: maria.petrova@example.com}
+  opening_message: "Two things: where is my washing machine (AU-10482), and I also want to return the air fryer from order AU-10560, it's too big."
+  script:
+    turns: ["maria.petrova@example.com"]
+    fallback: And what about the air fryer return?
+    done_when: 'RMA-\d+'
+  max_turns: 4
+  expected_tool_calls:
+    - name: check_order_status
+      args: {order_id: AU-10482, email: maria.petrova@example.com}
+    - name: create_return_request
+      args: {order_id: AU-10560, email: maria.petrova@example.com}
+  must_say:
+    - id: refund-after-inspection
+      description: Explains the refund comes after inspection
+      pattern: '(?i)inspect'
+  success_criteria:
+    - The agent handles both requests (delivery date and return) without the customer repeating the second one.
+    - The agent verifies the email before sharing details or opening the return.

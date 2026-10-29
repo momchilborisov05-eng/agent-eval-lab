@@ -1,0 +1,73 @@
+{
+  "type": "post_call_transcription",
+  "event_timestamp": 1793260800,
+  "data": {
+    "agent_id": "agent_example_brightway_support",
+    "conversation_id": "conv_example_0001",
+    "status": "done",
+    "transcript": [
+      {
+        "role": "agent",
+        "message": "Hi, thanks for calling Brightway Appliances. How can I help?",
+        "time_in_call_secs": 0
+      },
+      {
+        "role": "user",
+        "message": "Hi, um, I'm calling about my washing machine, the order is A U one oh four eight two.",
+        "time_in_call_secs": 4
+      },
+      {
+        "role": "agent",
+        "message": "Sure. For your security, could you tell me the email address on the order?",
+        "time_in_call_secs": 6
+      },
+      {
+        "role": "user",
+        "message": "It's maria dot petrova at example dot com.",
+        "time_in_call_secs": 11
+      },
+      {
+        "role": "agent",
+        "message": null,
+        "time_in_call_secs": 12,
+        "tool_calls": [
+          {
+            "tool_name": "check_order_status",
+            "request_id": "req_1",
+            "params_as_json": "{\"order_id\": \"AU-10482\", \"email\": \"maria.petrova@example.com\"}"
+          }
+        ],
+        "tool_results": [
+          {
+            "tool_name": "check_order_status",
+            "request_id": "req_1",
+            "result_value": "{\"order_id\": \"AU-10482\", \"email_verified\": true, \"status\": \"out_for_delivery\", \"eta\": \"2026-10-31\"}",
+            "is_error": false
+          }
+        ]
+      },
+      {
+        "role": "agent",
+        "message": "Thanks Maria. Your washing machine is out for delivery and will arrive on Saturday, October 31.",
+        "time_in_call_secs": 13
+      },
+      {
+        "role": "user",
+        "message": "Great, thank you, bye.",
+        "time_in_call_secs": 18
+      },
+      {
+        "role": "agent",
+        "message": "You're welcome, have a nice day!",
+        "time_in_call_secs": 19
+      }
+    ],
+    "metadata": {
+      "start_time_unix_secs": 1793260780,
+      "call_duration_secs": 20
+    },
+    "analysis": {
+      "call_successful": "success"
+    }
+  }
+}
