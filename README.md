@@ -224,7 +224,17 @@ Still failing in both: `voice-spelled-email`. "j o h n dot c a r t e r at exampl
 |---|---|
 | ![Compare](examples/screenshot-compare.png) | ![GTM](examples/screenshot-gtm.png) |
 
+The dashboard uses a dark/light design with glass cards, themed Chart.js charts and GSAP motion. The sun/moon button in the top bar switches the theme (saved in the browser; `?theme=light` or `?theme=dark` in the URL also works). If the CDN scripts can't load, the pages still work, just without animation or charts.
+
 The overview ([screenshot](examples/screenshot-overview.png)) shows the pass rate per run and per category, judge agreement and the number of results that need human review. The transcript viewer outlines the agent turn where a check failed, shows each tool call with its arguments and result, and lists the judge's scores per trial with evidence quotes.
+
+### Screenshots
+
+Light theme: [overview](examples/screenshot-overview-light.png) · [transcript](examples/screenshot-transcript-light.png) · [run comparison](examples/screenshot-compare-light.png). Phone (390 px): [overview](examples/screenshot-overview-mobile.png) · [transcript](examples/screenshot-transcript-mobile.png).
+
+| Light theme | Phone (390 px) |
+|---|---|
+| ![Overview, light theme](examples/screenshot-overview-light.png) | ![Transcript on a phone](examples/screenshot-transcript-mobile.png) |
 
 ## Plugging in an ElevenLabs agent
 
